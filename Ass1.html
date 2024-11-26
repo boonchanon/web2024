@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>แบบทดสอบ ม.1</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <style>
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background-color: #fafafa;
+      color: #333;
+      padding-top: 30px;
+    }
+
+    .container-fluid {
+      background-color: #fff;
+      padding: 2rem;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .container-fluid h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 1rem;
+      font-weight: 500;
+      box-shadow: none;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .btn-primary {
+      background-color: #007bff;
+      border: none;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #0056b3;
+      transform: scale(1.05);
+    }
+
+    .btn-check-answer {
+      background-color: #28a745;
+      border: none;
+      color: white;
+    }
+
+    .btn-check-answer:hover {
+      background-color: #218838;
+      transform: scale(1.05);
+    }
+
+    .quiz-container {
+      background-color: #fff;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      border: 1px solid #e0e0e0;
+    }
+
+    .quiz-question {
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+      font-weight: 500;
+      color: #333;
+    }
+
+    .quiz-options {
+      padding-left: 20px;
+      color: #555;
+    }
+
+    .quiz-options div {
+      padding: 5px 0;
+    }
+
+    .modal-content {
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .modal-header {
+      border-bottom: 1px solid #ddd;
+      background-color: #f8f8f8;
+    }
+
+    .modal-title {
+      font-weight: 600;
+      font-size: 1.2rem;
+    }
+
+    .alert-success, .alert-warning, .alert-error {
+      border-radius: 5px;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    .alert-success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .alert-warning {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+    .alert-error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+
+    .quiz-options .correct {
+      color: green;
+      font-weight: bold;
+    }
+
+    .quiz-options .incorrect {
+      color: red;
+      font-weight: bold;
+    }
+
+
+
+  .timer {
+    font-size: 3rem;  /* ขนาดตัวเลขใหญ่มาก */
+    font-weight: bold;
+    color: #4CAF50;  /* สีเขียวที่น่ารัก */
+    font-family: 'Arial', sans-serif;
+    background-color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    display: inline-block;
+    border: 2px solid #4CAF50;  /* ขอบสีเขียว */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  </style>
+</head>
+<body>
+
+  <div class="container-fluid">
+    <h1>แบบทดสอบ Quiz ง่ายๆ</h1>
+  </div>
+
+  <!-- Main Content -->
+  <div class="container mt-5">
+    <div class="row mb-4">
+      <div class="col-12 text-center">
+        <h2>ยินดีต้อนรับสู่แบบทดสอบออนไลน์!</h2>
+        <p>แบบทดสอบนี้ประกอบไปด้วย <strong>5 ข้อ</strong> ซึ่งจะทดสอบความรู้ในวิชาวิทยาศาสตร์ ม.1</p>
+        <p>คุณสามารถเลือกคำตอบจากตัวเลือกที่ให้มา หลังจากตอบครบทุกข้อแล้วให้กด "ตรวจคำตอบ" เพื่อดูผลคะแนนของคุณ</p>
+        <p>หากพร้อมแล้วก็กดปุ่ม "เริ่มทำแบบทดสอบ" ด้านล่างเพื่อเริ่มทำแบบทดสอบ</p>
+      </div>
+    </div>
+
+    <!-- Start Button -->
+    <div class="row" id="startBox">
+      <div class="col-12 text-center">
+        <button class="btn btn-primary btn-lg" id="btnStart">เริ่มทำแบบทดสอบ</button>
+      </div>
+    </div>
+
+    <br>
+
+    <!-- Timer -->
+    <div class="row" id="timerBox" style="display:none;">
+      <div class="col-12 text-center">
+        <div class="timer" id="timer">10:00</div>
+      </div>
+    </div>
+    <br>
+
+    <div class="row" id="quizBox" style="display:none;">
+      <div id="quizListBox"></div>
+      <button class="btn btn-check-answer btn-lg" id="btnCheckAnswer">ตรวจคำตอบ</button>
+    </div>
+  </div>
+
+  <!-- Result Modal -->
+  <div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="resultModalLabel">ผลลัพธ์การทดสอบ</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="resultBox">
+          <!-- Result message will be displayed here -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnReset">เริ่มใหม่</button>
+        </div>
+      </div>
+    </div>
+  </div>
+<script>
+$(function(){
+  var countdown;
+  var timeLeft = 600; // 10 minutes in seconds
+
+  $("#quizBox").hide();
+  $("#timerBox").hide();
+
+  $("#btnStart").click(function(){
+    $("#startBox").hide();
+    $("#quizBox").show();
+    $("#timerBox").show();
+    displayQuizList();
+    startTimer();
+  });
+
+  $("#btnCheckAnswer").click(function(){
+    checkAnswers();
+  });
+
+  $("#btnReset").click(function(){
+    resetQuiz();
+  });
+
+  function startTimer() {
+    countdown = setInterval(function(){
+      if(timeLeft <= 0){
+        clearInterval(countdown);
+        alert("หมดเวลา! โปรดตรวจคำตอบของคุณ.");
+        checkAnswers();
+      } else {
+        timeLeft--;
+        var minutes = Math.floor(timeLeft / 60);
+        var seconds = timeLeft % 60;
+        $("#timer").text(minutes + ":" + (seconds < 10 ? "0" : "") + seconds);
+      }
+    }, 1000);
+  }
+
+  function displayQuizList(){
+    $("#quizListBox").html("");
+    for(var i in quizlist){
+      displayQuiz(i, quizlist[i]);
+    }
+  }
+
+  function displayQuiz(i, q){
+    var no = parseInt(i) + 1;
+    var quizHtml = "<div class='quiz-container'><div class='quiz-question'>ข้อที่ " + no + ". " + q.title + "</div>";
+    for(var c in q.options){
+      var v = parseInt(c) + 1;
+      quizHtml += "<div class='quiz-options'>";
+      quizHtml += "<input type='radio' name='q"+no+"' value='"+v+"' id='q"+no+"-"+v+"'> <label for='q"+no+"-"+v+"'>"+v+". " + q.options[c] + "</label></div>";  
+    }
+    quizHtml += "</div>";
+    $("#quizListBox").append(quizHtml);
+  }
+
+  function checkAnswers() {
+    var score = 0;
+    var totalQuestions = quizlist.length;
+    var unanswered = false;  // Flag to track if any question is unanswered
+
+    // Loop through all the quiz questions to check if all are answered
+    for (var i in quizlist) {
+      var no = parseInt(i) + 1;
+      var selectedOption = $("input[name='q" + no + "']:checked").val();
+    
+      if (selectedOption == undefined) {
+        unanswered = true; // Mark as unanswered if no option is selected
+        break;  // Stop checking further questions once we find an unanswered one
+      }
+    }
+
+    // If there are unanswered questions, show a warning and stop the function here
+    if (unanswered) {
+      alert("ยังมีข้อสอบที่ยังไม่ได้ทำ กรุณาตอบทุกข้อก่อนตรวจคำตอบ. 🧐");
+      return;  // Stop the function without showing the results
+    }
+
+    // Loop through all the quiz questions to calculate the score and highlight correct/incorrect answers
+    for (var i in quizlist) {
+      var no = parseInt(i) + 1;
+      var selectedOption = $("input[name='q" + no + "']:checked").val();
+    
+      if (selectedOption != undefined && selectedOption == quizlist[i].answer) {
+        score++;
+        highlightCorrectAnswer(i, selectedOption);
+      } else {
+        highlightIncorrectAnswer(i);
+      }
+    }
+
+    // Show the result after checking all answers
+    var resultMessage = "คุณได้ " + score + " จาก " + totalQuestions + " ข้อ ";
+    var resultClass = "";
+    var emoji = "";
+
+    if (score == totalQuestions) {
+      resultMessage += "(ตอบถูกทั้งหมด) 🎉";
+      resultClass = "alert-success";
+      emoji = "😍";
+    } else if (score >= totalQuestions / 2) {
+      resultMessage += "(คะแนนดี) 💪";
+      resultClass = "alert-warning";
+      emoji = "😊";
+    } else {
+      resultMessage += "(คะแนนต้องปรับปรุง) 🥺";
+      resultClass = "alert-error";
+      emoji = "😢";
+    }
+
+    $("#resultBox").html('<div class="alert ' + resultClass + '">' + resultMessage + " " + emoji + '</div>');
+    var myModal = new bootstrap.Modal(document.getElementById('resultModal'));
+    myModal.show();
+  }
+
+  function highlightCorrectAnswer(i, selectedOption) {
+    var correctOption = quizlist[i].answer;
+    $("input[name='q" + (parseInt(i) + 1) + "'][value='" + correctOption + "']").next().addClass('correct');
+  }
+
+  function highlightIncorrectAnswer(i) {
+    var correctOption = quizlist[i].answer;
+    var selectedOption = $("input[name='q" + (parseInt(i) + 1) + "']:checked").val();
+    if (selectedOption != undefined) {
+      $("input[name='q" + (parseInt(i) + 1) + "'][value='" + selectedOption + "']").next().addClass('incorrect');
+    }
+    $("input[name='q" + (parseInt(i) + 1) + "'][value='" + correctOption + "']").next().addClass('correct');
+  }
+
+  function resetQuiz(){
+    timeLeft = 600; 
+    $("#timer").text("10:00"); 
+    $("#quizBox").hide();
+    $("#startBox").show();
+    $("input[type='radio']").prop("checked", false);
+    $("#resultBox").html("");
+    clearInterval(countdown);
+  }
+});
+
+
+var quizlist = [
+  {
+    "title": "ข้อใดคือส่วนประกอบหลักของเซลล์พืชที่ทำหน้าที่ในการสังเคราะห์แสง?",
+    "options": [
+      "เยื่อหุ้มเซลล์",
+      "คลอโรพลาสต์",
+      "นิวเคลียส",
+      "ไมโทคอนเดรีย",
+      "ไซโตพลาสซึม"
+    ],
+    "answer": 2
+  },
+  {
+    "title": "น้ำที่มีอุณหภูมิ 0°C เรียกว่าอะไร?",
+    "options": [
+      "น้ำแข็ง",
+      "น้ำในสถานะของเหลว",
+      "น้ำไอน้ำ",
+      "น้ำร้อน",
+      "น้ำกรด"
+    ],
+    "answer": 1
+  },
+  {
+    "title": "โลกหมุนรอบตัวเองในระยะเวลาเท่าใด?",
+    "options": [
+      "1 วัน",
+      "1 เดือน",
+      "1 ปี",
+      "1 ชั่วโมง",
+      "1 สัปดาห์"
+    ],
+    "answer": 1
+  },
+  {
+    "title": "ดวงอาทิตย์เป็นดาวประเภทใด?",
+    "options": [
+      "ดาวเคราะห์",
+      "ดาวฤกษ์",
+      "ดาวหาง",
+      "ดาวเทียม",
+      "ดาวพุธ"
+    ],
+    "answer": 2
+  },
+  {
+    "title": "พืชชนิดใดที่สามารถสังเคราะห์แสงได้?",
+    "options": [
+      "พืชที่ไม่มีสีเขียว",
+      "พืชที่มีสีเขียว",
+      "เห็ด",
+      "เชื้อรา",
+      "สัตว์น้ำ"
+    ],
+    "answer": 2
+  },
+  {
+    "title": "การเปลี่ยนแปลงของสถานะน้ำจากของเหลวเป็นไอเรียกว่าอะไร?",
+    "options": [
+      "การกลั่น",
+      "การระเหย",
+      "การเย็นตัว",
+      "การหลอมละลาย",
+      "การตกตะกอน"
+    ],
+    "answer": 2
+  },
+  {
+    "title": "แหล่งพลังงานหลักที่ใช้ในการสังเคราะห์แสงคืออะไร?",
+    "options": [
+      "พลังงานลม",
+      "พลังงานไฟฟ้า",
+      "พลังงานแสงอาทิตย์",
+      "พลังงานน้ำ",
+      "พลังงานความร้อน"
+    ],
+    "answer": 3
+  },
+  {
+    "title": "ดาวเคราะห์ที่อยู่ใกล้ดวงอาทิตย์ที่สุดคือดาวอะไร?",
+    "options": [
+      "โลก",
+      "ดาวพุธ",
+      "ดาวศุกร์",
+      "ดาวอังคาร",
+      "ดาวพฤหัสบดี"
+    ],
+    "answer": 2
+  },
+  {
+    "title": "สิ่งมีชีวิตใดที่ไม่สามารถสังเคราะห์แสงได้?",
+    "options": [
+      "พืช",
+      "สัตว์",
+      "แบคทีเรีย",
+      "เชื้อรา",
+      "ต้นไม้"
+    ],
+    "answer": 2
+  },
+  {
+    "title": "น้ำมีสถานะทางกายภาพใดเมื่ออุณหภูมิสูงกว่า 100°C?",
+    "options": [
+      "ของเหลว",
+      "ไอ",
+      "น้ำแข็ง",
+      "น้ำร้อน",
+      "น้ำจืด"
+    ],
+    "answer": 2
+  },
+  {
+    "title": "แหล่งพลังงานที่ใช้ในการผลิตไฟฟ้าที่ได้จากลมคืออะไร?",
+    "options": [
+      "พลังงานจากลม",
+      "พลังงานจากแสงอาทิตย์",
+      "พลังงานจากน้ำ",
+      "พลังงานจากถ่านหิน",
+      "พลังงานจากน้ำมัน"
+    ],
+    "answer": 1
+  },
+  {
+    "title": "ผลไม้ที่ได้จากการเจริญเติบโตของดอกไม้คืออะไร?",
+    "options": [
+      "เมล็ด",
+      "ผล",
+      "ราก",
+      "ใบ",
+      "ลำต้น"
+    ],
+    "answer": 2
+  },
+  {
+    "title": "กระบวนการที่พืชใช้ในการดูดซึมน้ำและเกลือแร่จากดินคือกระบวนการใด?",
+    "options": [
+      "การสังเคราะห์แสง",
+      "การดูดซึม",
+      "การหายใจ",
+      "การเจริญเติบโต",
+      "การเปลี่ยนแปลงทางเคมี"
+    ],
+    "answer": 2
+  },
+  {
+    "title": "สิ่งมีชีวิตชนิดใดที่ไม่สามารถดำรงชีวิตได้โดยปราศจากแสง?",
+    "options": [
+      "สัตว์น้ำลึก",
+      "พืช",
+      "แบคทีเรีย",
+      "สัตว์กินพืช",
+      "สัตว์กินเนื้อ"
+    ],
+    "answer": 2
+  },
+  {
+    "title": "สภาวะที่น้ำแข็งจะละลายกลายเป็นน้ำเรียกว่าอะไร?",
+    "options": [
+      "การระเหย",
+      "การเย็นตัว",
+      "การหลอมละลาย",
+      "การกลั่น",
+      "การฟื้นฟู"
+    ],
+    "answer": 3
+  },
+  {
+    "title": "ดาวอังคารมีบรรยากาศประกอบไปด้วยแก๊สอะไรเป็นหลัก?",
+    "options": [
+      "ออกซิเจน",
+      "คาร์บอนไดออกไซด์",
+      "ไนโตรเจน",
+      "ฮีเลียม",
+      "มีเทน"
+    ],
+    "answer": 2
+  },
+  {
+    "title": "กระบวนการสังเคราะห์แสงใช้พลังงานจากแหล่งไหน?",
+    "options": [
+      "แสงไฟฟ้า",
+      "แสงจากดวงจันทร์",
+      "แสงจากดวงอาทิตย์",
+      "แสงจากหลอดไฟ",
+      "แสงจากดวงดาว"
+    ],
+    "answer": 3
+  },
+  {
+    "title": "เมฆที่มีลักษณะปกคลุมทั่วท้องฟ้าเรียกว่าเมฆประเภทใด?",
+    "options": [
+      "เมฆฝน",
+      "เมฆชนิดโค้ง",
+      "เมฆแบบฝน",
+      "เมฆฟ้าผ่า",
+      "เมฆขาว"
+    ],
+    "answer": 1
+  },
+  {
+    "title": "ในกระบวนการหายใจของพืชจะใช้แก๊สอะไร?",
+    "options": [
+      "ออกซิเจน",
+      "คาร์บอนไดออกไซด์",
+      "ไนโตรเจน",
+      "ฮีเลียม",
+      "มีเทน"
+    ],
+    "answer": 1
+  },
+  {
+    "title": "สิ่งที่ใช้ในการวัดความร้อนของน้ำคืออะไร?",
+    "options": [
+      "ปิ่นโต",
+      "เทอร์โมมิเตอร์",
+      "กล้องจุลทรรศน์",
+      "ปีกผีเสื้อ",
+      "กล่องโฟม"
+    ],
+    "answer": 2
+  }
+];
+
+</script>
+
+</body>
+</html>
