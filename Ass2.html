@@ -1,1 +1,204 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แบบทดสอบวิชาสังคม</title>
+    <!-- โหลด Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- ฟอนต์ใหม่จาก Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.45/dist/vue.global.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f7fa;
+            color: #333;
+            padding-top: 30px;
+        }
+
+        .container {
+            max-width: 900px;
+        }
+
+        .card {
+            background: #ffffff;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            padding: 30px;
+        }
+
+        h1, h2 {
+            color: #007bff;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        #subject-select {
+            max-width: 300px;
+            margin: 20px auto;
+        }
+
+        #questions-container {
+            text-align: left;
+        }
+
+        .question-title {
+            margin-bottom: 15px;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .choices label {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            display: block;
+            background: #f7f9fc;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .choices label:hover {
+            background: #e9f5ff;
+        }
+
+        #score {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 15px;
+            background: #e9f7e5;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            border: none;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" class="container mt-5">
+        <!-- Start Screen -->
+        <div v-if="currentScreen === 'start'" class="card">
+            <h1>ยินดีต้อนรับสู่แบบทดสอบวิชาสังคม</h1>
+            <h3> BY 663380351-4</h3>
+            <p>เลือกวิชาที่คุณต้องการทำแบบทดสอบ</p>
+            <select v-model="selectedSubject" id="subject-select" class="form-select">
+                <option value="history">ประวัติศาสตร์</option>
+            </select>
+            <button class="btn btn-primary mt-3" @click="startQuiz">เริ่มทำแบบทดสอบ</button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div v-if="currentScreen === 'quiz'" class="card mb-3">
+            <h2>{{ quizTitle }}</h2>
+            <div id="questions-container">
+                <div v-for="(question, index) in questions" :key="index" class="mb-4">
+                    <p class="question-title">{{ index + 1 }}. {{ question.question }}</p>
+                    <div class="choices">
+                        <label v-for="(choice, i) in question.choices" :key="i">
+                            <input type="radio" :name="'question-' + index" :value="i" v-model="userAnswers[index]">
+                            {{ choice }}
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-success mt-3" :disabled="!allAnswered" @click="submitQuiz">ตรวจคำตอบ</button>
+        </div>
+
+        <!-- Result Screen -->
+        <div v-if="currentScreen === 'result'" class="card">
+            <h2>ผลคะแนน</h2>
+            <div class="result">
+                <p id="score">คุณได้คะแนน {{ correctAnswers }} / {{ questions.length }}</p>
+            </div>
+            <button class="btn btn-primary mt-3" @click="restartQuiz">เริ่มใหม่</button>
+        </div>
+    </div>
+
+    <script>
+        const app = Vue.createApp({
+            data() {
+                return {
+                    currentScreen: 'start',
+                    selectedSubject: 'history',
+                    questions: [],
+                    userAnswers: [],
+                    correctAnswers: 0,
+                    quizTitle: "ประวัติศาสตร์",
+                };
+            },
+            computed: {
+                allAnswered() {
+                    return this.userAnswers.length === this.questions.length && !this.userAnswers.includes(undefined);
+                },
+            },
+            methods: {
+                async loadQuestions() {
+                    const response = await fetch("questions.json");
+                    const data = await response.json();
+                    this.questions = data[this.selectedSubject];
+                    this.userAnswers = new Array(this.questions.length).fill(undefined);  // Initialize userAnswers with undefined values
+                },
+                startQuiz() {
+                    this.currentScreen = 'quiz';
+                    this.loadQuestions();
+                },
+                submitQuiz() {
+                    this.correctAnswers = this.userAnswers.filter((answer, index) => answer === this.questions[index].answer).length;
+                    this.currentScreen = 'result';
+                },
+                restartQuiz() {
+                    this.currentScreen = 'start';
+                    this.userAnswers = [];
+                    this.correctAnswers = 0;
+                },
+            },
+        });
+
+        app.mount("#app");
+    </script>
+</body>
+
+</html>
 
