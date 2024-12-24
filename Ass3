@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แบบทดสอบวิชาสังคม</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f8f4; /* พื้นหลังสีเขียวอ่อน */
+            color: #333;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            flex-direction: column;
+            padding: 30px; /* เพิ่มระยะห่าง */
+        }
+
+        .card {
+            background: #ffffff;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            transform: scale(0.9);
+            opacity: 0;
+            animation: fadeIn 1s forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: #28a745; /* สีเขียวหลัก */
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            line-height: 1.5; /* เพิ่มระยะห่างระหว่างบรรทัด */
+        }
+
+        button {
+            background-color: #28a745; /* ปุ่มสีเขียว */
+            color: white;
+            font-size: 1.2rem;
+            padding: 18px 35px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 20px;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #218838; /* ปุ่มสีเขียวเข้มเมื่อ hover */
+            transform: scale(1.05);
+        }
+
+        select {
+            background-color: #28a745; /* สีพื้นหลังของ select */
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            width: 100%;
+            margin-top: 25px;
+            border: none;
+            font-size: 1.2rem;
+            line-height: 1.5;
+        }
+
+        select:focus {
+            outline: none;
+            box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
+        }
+
+        .btn-primary {
+            background-color: #28a745; /* สีเขียว */
+            border-radius: 12px;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background-color: #218838;
+        }
+
+        .btn-back {
+            background-color: #dc3545; /* สีแดงสำหรับปุ่มเริ่มใหม่ */
+            color: white;
+            width: 100%;
+        }
+
+        .btn-back:hover {
+            background-color: #c82333;
+        }
+
+        .mb-3 {
+            margin-bottom: 25px;
+        }
+
+        .d-flex {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+        }
+
+        .question-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .choices {
+            margin-top: 15px;
+            margin-bottom: 30px;
+        }
+
+        .choices input {
+            margin-right: 12px;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div id="app" class="container mt-5"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const App = () => {
+            const [currentScreen, setCurrentScreen] = useState("start");
+            const [selectedSubject, setSelectedSubject] = useState("Health Education");
+            const [questions, setQuestions] = useState([]);
+            const [userAnswers, setUserAnswers] = useState([]);
+            const [correctAnswers, setCorrectAnswers] = useState(0);
+            const [quizTitle, setQuizTitle] = useState("สุขศึกษา");
+            const [currentPage, setCurrentPage] = useState(0);
+
+            useEffect(() => {
+                if (currentScreen === "quiz") {
+                    loadQuestions();
+                }
+            }, [currentScreen]);
+
+            const loadQuestions = async () => {
+                const response = await fetch("questions3.json");
+                const data = await response.json();
+                setQuestions(data[selectedSubject]);
+                setUserAnswers(new Array(data[selectedSubject].length).fill(undefined));
+            };
+
+            const allAnswered = userAnswers.length === questions.length && !userAnswers.includes(undefined);
+
+            const startQuiz = () => {
+                setCurrentScreen("quiz");
+            };
+
+            const submitQuiz = () => {
+                const score = userAnswers.filter((answer, index) => answer === questions[index].answer).length;
+                setCorrectAnswers(score);
+                setCurrentScreen("result");
+            };
+
+            const restartQuiz = () => {
+                setCurrentScreen("start");
+                setUserAnswers([]);
+                setCorrectAnswers(0);
+                setCurrentPage(0);
+            };
+
+            const nextPage = () => {
+                if ((currentPage + 1) * 5 < questions.length) {
+                    setCurrentPage(currentPage + 1);
+                }
+            };
+
+            const prevPage = () => {
+                if (currentPage > 0) {
+                    setCurrentPage(currentPage - 1);
+                }
+            };
+
+            const currentQuestions = questions.slice(currentPage * 5, (currentPage + 1) * 5);
+
+            return (
+                <div>
+                    {currentScreen === "start" && (
+                        <div className="card">
+                            <h1>ยินดีต้อนรับสู่แบบทดสอบวิชาสังคม</h1>
+                            <h3>BY 663380351-4</h3>
+                            <p>เลือกวิชาที่คุณต้องการทำแบบทดสอบ</p>
+                            <select
+                                value={selectedSubject}
+                                onChange={(e) => setSelectedSubject(e.target.value)}
+                                className="form-select"
+                            >
+                                <option value="Health Education">สุขศึกษา</option>
+                            </select>
+                            <button className="btn btn-primary mt-3" onClick={startQuiz}>
+                                เริ่มทำแบบทดสอบ
+                            </button>
+                        </div>
+                    )}
+
+                    {currentScreen === "quiz" && (
+                        <div className="card mb-3">
+                            <h2>{quizTitle}</h2>
+                            <div id="questions-container">
+                                {currentQuestions.map((question, index) => (
+                                    <div key={index} className="mb-4">
+                                        <p className="question-title">
+                                            {currentPage * 5 + index + 1}. {question.question}
+                                        </p>
+                                        <div className="choices">
+                                            {question.choices.map((choice, i) => (
+                                                <label key={i}>
+                                                    <input
+                                                        type="radio"
+                                                        name={"question-" + index}
+                                                        value={i}
+                                                        onChange={(e) => {
+                                                            const newAnswers = [...userAnswers];
+                                                            newAnswers[currentPage * 5 + index] = parseInt(e.target.value);
+                                                            setUserAnswers(newAnswers);
+                                                        }}
+                                                        checked={userAnswers[currentPage * 5 + index] === i}
+                                                    />
+                                                    {choice}
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="d-flex justify-content-between">
+                                <button className="btn btn-primary" onClick={prevPage} disabled={currentPage === 0}>
+                                    ย้อนกลับ
+                                </button>
+                                {currentPage * 5 + 5 < questions.length && (
+                                    <button className="btn btn-primary" onClick={nextPage}>
+                                        ถัดไป
+                                    </button>
+                                )}
+                                {currentPage * 5 + 5 >= questions.length && (
+                                    <button className="btn btn-success" disabled={!allAnswered} onClick={submitQuiz}>
+                                        ตรวจคำตอบ
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {currentScreen === "result" && (
+                        <div className="card">
+                            <h2>ผลคะแนน</h2>
+                            <div className="result">
+                                <p id="score">คุณได้คะแนน {correctAnswers} / {questions.length}</p>
+                            </div>
+                            <button className="btn btn-back mt-3" onClick={restartQuiz}>
+                                เริ่มใหม่
+                            </button>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const container = document.getElementById("app");
+        const root = ReactDOM.createRoot(container);
+        root.render(<App />);
+    </script>
+</body>
+
+</html>
