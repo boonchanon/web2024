@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>360 Scene with A-Frame</title>
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.2/dist/aframe-extras.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+    a-scene {
+      display: block;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <a-scene 
+    vr-mode-ui="enabled: true" 
+    embedded>
+    
+    <!-- 360 Panorama Background (Space themed) -->
+    <a-sky src="./af/bg_3.jpg" radius="10" rotation="0 -130 0"></a-sky>
+
+    <!-- 3D Model (GLB format) with animation -->
+    <a-entity 
+      gltf-model="./af/Animated Robot.glb" 
+      animation-mixer="clip:*" 
+      scale="0.5 0.5 0.5" 
+      position="0 0.45905 -4.41752"
+      animation="property: rotation; to: 0 360 0; dur: 5000; loop: true">
+    </a-entity>
+
+    <!-- Text "Boonchanon 663380351-4" above the model -->
+    <a-text 
+      value="Boonchanon 663380351-4" 
+      position="0 3 -3" 
+      color="#FFD700" 
+      align="center" 
+      font="https://cdn.aframe.io/fonts/mozillavr.fnt" 
+      scale="1 1 1" 
+      letter-spacing="0.1">
+    </a-text>
+
+    <!-- Light -->
+    <a-light type="ambient" color="#ffffff" intensity="0.6" position="0 4 0"></a-light>
+    <a-light type="directional" color="#ffffff" intensity="1" position="2 4 -3"></a-light>
+
+    <!-- Floating particles for extra decoration -->
+    <a-entity particle-system="preset: dust; particleCount: 5000; color: #FF00FF; opacity: 0.3" position="0 3 -4"></a-entity>
+
+    <!-- Enable walking and movement -->
+    <a-camera wasd-controls="enabled: true" look-controls="pointerLockEnabled: true">
+      <!-- Optional, you can customize the camera position -->
+    </a-camera>
+
+  </a-scene>
+</body>
+</html>
