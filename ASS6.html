@@ -1,1 +1,381 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/react/umd/react.production.min.js" crossorigin></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        crossorigin="anonymous" />
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-bootstrap/2.7.4/react-bootstrap.min.js"></script>
+    <style>
+        body {
+            background-color: #f4f7fc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin-top: 30px;
+        }
+
+        .form-container {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .card-header {
+            text-align: center;
+            font-size: 1.5rem;
+            background-color: #f8f9fa;
+            border-radius: 10px 10px 0 0;
+            padding: 20px;
+        }
+
+        .btn-custom {
+            border-radius: 30px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-custom:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-google {
+            background-color: #4285f4;
+            color: white;
+            border-radius: 30px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-google:hover {
+            background-color: #3367d6;
+        }
+
+        .btn-logout {
+            background-color: #ea4335;
+            color: white;
+            border-radius: 30px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            background-color: #c1351d;
+        }
+
+        .form-container input,
+        .form-container select,
+        .form-container button {
+            border-radius: 30px;
+            box-shadow: none;
+        }
+
+        .form-container .form-label {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-container .form-control {
+            border: 1px solid #ddd;
+            box-shadow: none;
+        }
+
+        .form-container .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .table th, .table td {
+            vertical-align: middle;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .form-footer {
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+        }
+
+        .student-table {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .student-table thead {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .student-table th, .student-table td {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="myapp" class="container p-4"></div>
+    <script type="text/babel">
+        const { Card, Button, Form } = ReactBootstrap;
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDV1-sztomG-MgS1VZbm8LlHecsTcW_6s8",
+            authDomain: "web2567-1658a.firebaseapp.com",
+            projectId: "web2567-1658a",
+            storageBucket: "web2567-1658a.firebasestorage.app",
+            messagingSenderId: "384034521071",
+            appId: "1:384034521071:web:de871fca0b4dffa23f801a"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        class App extends React.Component {
+            state = {
+                students: [],
+                stdid: "",
+                stdtitle: "",
+                stdfname: "",
+                stdlname: "",
+                stdemail: "",
+                stdphone: "",
+                user: null
+            };
+
+            constructor() {
+                super();
+                firebase.auth().onAuthStateChanged((user) => {
+                    this.setState({ user: user ? user.toJSON() : null });
+                });
+            }
+
+            componentDidMount() {
+                this.readData();
+            }
+
+            readData = () => {
+                db.collection("students").get().then((querySnapshot) => {
+                    let studentsList = [];
+                    querySnapshot.forEach((doc) => {
+                        studentsList.push({ id: doc.id, ...doc.data() });
+                    });
+                    this.setState({ students: studentsList });
+                });
+            };
+
+            insertOrUpdateData = () => {
+                const { stdid, stdtitle, stdfname, stdlname, stdemail, stdphone } = this.state;
+                if (!stdid) {
+                    alert("กรุณากรอก ID นักศึกษา!");
+                    return;
+                }
+                db.collection("students").doc(stdid).set({
+                    title: stdtitle,
+                    fname: stdfname,
+                    lname: stdlname,
+                    phone: stdphone,
+                    email: stdemail
+                }).then(() => {
+                    alert('ข้อมูลถูกบันทึก');
+                    this.setState({ stdid: "", stdtitle: "", stdfname: "", stdlname: "", stdemail: "", stdphone: "" });
+                    this.readData();
+                }).catch((error) => {
+                    console.error("Error adding document: ", error);
+                });
+            };
+
+            edit = (std) => {
+                this.setState({
+                    stdid: std.id,
+                    stdtitle: std.title,
+                    stdfname: std.fname,
+                    stdlname: std.lname,
+                    stdemail: std.email,
+                    stdphone: std.phone
+                });
+            };
+
+            deleteData = (std) => {
+                if (window.confirm("ต้องการลบข้อมูล?")) {
+                    db.collection("students").doc(std.id).delete()
+                        .then(() => {
+                            alert('ข้อมูลถูกลบ');
+                            this.readData();
+                        })
+                        .catch((error) => {
+                            console.error("Error deleting document: ", error);
+                            alert("เกิดข้อผิดพลาดในการลบข้อมูล");
+                        });
+                }
+            };
+
+            google_login = () => {
+                let provider = new firebase.auth.GoogleAuthProvider();
+                provider.addScope("profile");
+                provider.addScope("email");
+                firebase.auth().signInWithPopup(provider);
+            };
+
+            google_logout = () => {
+                if (window.confirm("ต้องการออกจากระบบ?")) {
+                    firebase.auth().signOut();
+                }
+            };
+
+            render() {
+                return (
+                    <Card className="p-3">
+                        <Card.Header>
+                            <h4 className="text-center">ระบบจัดการนักศึกษา</h4>
+                        </Card.Header>
+
+                        <LoginBox user={this.state.user} app={this} />
+
+                        <Card.Body>
+                            <Button onClick={this.readData} className="btn btn-primary mb-3">โหลดข้อมูล</Button>
+                            <StudentTable data={this.state.students} app={this} />
+                        </Card.Body>
+
+                        <Card.Footer className="form-footer">
+                            <b>เพิ่ม/แก้ไขข้อมูล นักศึกษา</b>
+                            <StudentForm app={this} />
+                        </Card.Footer>
+                    </Card>
+                );
+            }
+        }
+
+        function StudentTable({ data, app }) {
+            return (
+                <div className="student-table">
+                    <table className="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>รหัส</th>
+                                <th>คำนำหน้า</th>
+                                <th>ชื่อ</th>
+                                <th>สกุล</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {data.map((s) => (
+                                <tr key={s.id}>
+                                    <td>{s.id}</td>
+                                    <td>{s.title}</td>
+                                    <td>{s.fname}</td>
+                                    <td>{s.lname}</td>
+                                    <td>{s.email}</td>
+                                    <td>{s.phone}</td>
+                                    <td>
+                                        <Button variant="warning" onClick={() => app.edit(s)} className="btn-custom">แก้ไข</Button>
+                                        <Button variant="danger" onClick={() => app.deleteData(s)} className="ms-2 btn-custom">ลบ</Button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            );
+        }
+
+        function StudentForm({ app }) {
+            return (
+                <div className="form-container">
+                    <Form>
+                        <div className="row">
+                            <div className="col-md-4">
+                                <Form.Group>
+                                    <Form.Label className="form-label">ID</Form.Label>
+                                    <Form.Control value={app.state.stdid} onChange={e => app.setState({ stdid: e.target.value })} />
+                                </Form.Group>
+                            </div>
+
+                            <div className="col-md-4">
+                                <Form.Group>
+                                    <Form.Label className="form-label">คำนำหน้า</Form.Label>
+                                    <Form.Control value={app.state.stdtitle} onChange={e => app.setState({ stdtitle: e.target.value })} />
+                                </Form.Group>
+                            </div>
+
+                            <div className="col-md-4">
+                                <Form.Group>
+                                    <Form.Label className="form-label">ชื่อ</Form.Label>
+                                    <Form.Control value={app.state.stdfname} onChange={e => app.setState({ stdfname: e.target.value })} />
+                                </Form.Group>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-4">
+                                <Form.Group>
+                                    <Form.Label className="form-label">สกุล</Form.Label>
+                                    <Form.Control value={app.state.stdlname} onChange={e => app.setState({ stdlname: e.target.value })} />
+                                </Form.Group>
+                            </div>
+                            <div className="col-md-4">
+                                <Form.Group>
+                                    <Form.Label className="form-label">เบอร์โทร</Form.Label>
+                                    <Form.Control value={app.state.stdphone} onChange={e => app.setState({ stdphone: e.target.value })} />
+                                </Form.Group>
+                            </div>
+                            <div className="col-md-4">
+                                <Form.Group>
+                                    <Form.Label className="form-label">Email</Form.Label>
+                                    <Form.Control value={app.state.stdemail} onChange={e => app.setState({ stdemail: e.target.value })} />
+                                </Form.Group>
+                            </div>
+                        </div>
+
+                        <Button onClick={app.insertOrUpdateData} className="btn btn-success mt-3 w-100 btn-custom">บันทึก</Button>
+                    </Form>
+                </div>
+            );
+        }
+
+        function LoginBox(props) {
+            const u = props.user;
+            const app = props.app;
+
+            if (!u) {
+                return (
+                    <div className="d-flex justify-content-center mt-3">
+                        <Button onClick={() => app.google_login()} className="btn-google">Login with Google</Button>
+                    </div>
+                );
+            } else {
+                return (
+                    <div className="d-flex align-items-center justify-content-center mt-3">
+                        <img src={u.photoURL} alt="Profile" className="profile-img" />
+                        <span>{u.email}</span>
+                        <Button onClick={() => app.google_logout()} className="btn-logout ms-3">Logout</Button>
+                    </div>
+                );
+            }
+        }
+
+        ReactDOM.render(<App />, document.getElementById("myapp"));
+    </script>
+</body>
+
+</html>
 
